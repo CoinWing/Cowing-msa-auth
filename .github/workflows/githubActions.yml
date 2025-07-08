@@ -2,7 +2,7 @@ name: CICD for member
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "prod" ]
 
 env:
   REGISTRY: ghcr.io
