@@ -1,9 +1,6 @@
 package cowing.auth.controller;
 
-import cowing.auth.dto.PasswordChangeDto;
-import cowing.auth.dto.PortfolioDto;
-import cowing.auth.dto.RegisterUserDto;
-import cowing.auth.dto.UserInfoDto;
+import cowing.auth.dto.*;
 import cowing.auth.entity.PrincipalDetails;
 import cowing.auth.entity.User;
 import cowing.auth.service.UserService;
@@ -68,6 +65,25 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "비밀번호 변경", description = "이메일로 유저 조회해서 닉네임 변경")
+    @ApiResponse(responseCode = "201", description = "닉네임 변경 성공")
+    @ApiResponse(responseCode = "400", description = "닉네임 변경 실패")
+    @PostMapping("/change/nickname")
+    public ResponseEntity<?> changeNickname(@AuthenticationPrincipal PrincipalDetails principal, @RequestBody NicknameChangeDto dto) {
+        boolean result = userService.updateNickname(principal.getUsername(), dto.nickname());
+        if (result) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 201);
+            response.put("message", "닉네임이 변경되었습니다!");
+            return ResponseEntity.status(201).body(response);
+        } else {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 400);
+            response.put("message", "닉네임 변경에 실패했습니다");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
     // 유저 포트폴리오 조회
     @Operation(summary = "포트폴리오 조회", description = "로그인된 유저의 포트폴리오 조회")
     @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공, 아직 거래내역 없을 시 존재하지 않는다는 메세지와 빈 배열 전달")
@@ -110,6 +126,34 @@ public class UserController {
         UserInfoDto userInfo = userService.getUserInfo(username);
 
         return ResponseEntity.ok(userInfo);
+    }
+
+    @Operation(summary = "계정 탈퇴", description = "로그인된 유저의 계정 탈퇴")
+    @ApiResponse(responseCode = "200", description = "탈퇴 성공")
+    @PostMapping("/deletion")
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal PrincipalDetails principal) {
+        String username = principal.getUsername();
+        userService.deleteUser(username);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("message", "계정이 성공적으로 삭제되었습니다.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "파산 신청", description = "로그인된 유저의 계정 탈퇴")
+    @ApiResponse(responseCode = "200", description = "파산 신청 성공")
+    @PostMapping("/bankrupt")
+    public ResponseEntity<?> bankrupt(@AuthenticationPrincipal PrincipalDetails principal) {
+        String username = principal.getUsername();
+        userService.bankrupt(username);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("message", "파산 신청이 완료되었습니다.");
+
+        return ResponseEntity.ok(response);
     }
 
 }

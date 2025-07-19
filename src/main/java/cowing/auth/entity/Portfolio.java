@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -31,4 +32,7 @@ public class Portfolio {
 
     @Column(name = "total_cost", nullable = false)
     private Long totalCost;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,9 +76,36 @@ public class UserService {
         return true;
     }
 
+    @Transactional
+    public boolean updateNickname(String username, String nickname) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if(optionalUser.isEmpty())
+            return false;
+
+        User user = optionalUser.get();
+        user.setNickname(nickname);
+        return true;
+    }
+
     @Transactional(readOnly = true)
     public List<PortfolioDto> getPortfolio(String username) {
-        return portfolioRepository.findByUsername(username).stream()
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        LocalDateTime bankruptAt = optionalUser.get().getBankruptAt();
+
+
+        List<Portfolio> portfolios;
+        if (bankruptAt == null) {
+            portfolios = portfolioRepository.findByUsername(username);
+        } else {
+            portfolios = portfolioRepository.findByUsernameAndCreatedAtAfter(username, bankruptAt);
+        }
+
+        return portfolios.stream()
                 .map(p -> new PortfolioDto(
                         p.getMarketCode(),
                         p.getQuantity(),
@@ -104,6 +132,21 @@ public class UserService {
                 user.getEmail(),
                 user.getUsername()
         );
+    }
+
+    @Transactional
+    public void deleteUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+        user.markAsDeleted();
+    }
+
+    @Transactional
+    public void bankrupt(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+        user.markAsBankrupt();
+        user.setUHoldings(10000000L);
     }
 
 }
