@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/coinwing/msa-auth
+  tag: latest
+  pullPolicy: Always
+  pullSecretName: ghcr-login-secret
+
+containerPort: 8080
+
+service:
+  type: ClusterIP
+  port: 80

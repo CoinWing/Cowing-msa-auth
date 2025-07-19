@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "msa-auth.fullname" . }}
+  labels:
+    app: {{ include "msa-auth.name" . }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ include "msa-auth.name" . }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.containerPort }}
+      protocol: TCP
+      name: http
