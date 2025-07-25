@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  GITOPS_REPO: kimminji-1130/Infrastructure
+  GITOPS_REPO: CoinWing/Infrastructure
 
 jobs:
   build-and-push:
