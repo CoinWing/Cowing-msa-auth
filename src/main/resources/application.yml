@@ -14,6 +14,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
         show_sql: true
 
   data:
@@ -29,7 +30,7 @@ logging:
       SQL: DEBUG
 
 server:
-  port: 8080
+  port: 8081
 management:
   endpoints:
     web:
