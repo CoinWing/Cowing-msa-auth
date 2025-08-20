@@ -1,14 +1,11 @@
 name: Semgrep CI for auth
 
 on:
+  push:
+    branches: ['main']
   pull_request:
     branches:
       - "**"
-  push:
-    branches:
-      - "**"
-    paths:
-      - ".github/workflows/semgrep.yml"
   workflow_dispatch: {}
 
 permissions:
