@@ -13,9 +13,11 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.MariaDBDialect
         show_sql: true
+        session_factory:
+          statement_inspector: cowing.auth.scope.CountingStatementInspector
+
 
   data:
     redis:
