@@ -35,22 +35,23 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        // 삭제된 계정은 비활성 처리 → 인증 단계에서 곧바로 차단되어 추가 조회를 유발하지 않음
+        return user.getDeletedAt() == null;
     }
 
 }

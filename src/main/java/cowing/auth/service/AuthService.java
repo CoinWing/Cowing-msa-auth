@@ -4,7 +4,6 @@ import cowing.auth.dto.LoginReqDto;
 import cowing.auth.dto.TokenDto;
 import cowing.auth.entity.User;
 import cowing.auth.exception.RefreshTokenInvalidException;
-import cowing.auth.jwt.JwtRedis;
 import cowing.auth.jwt.TokenProvider;
 import cowing.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +12,6 @@ import org.hibernate.service.spi.ServiceException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -38,16 +36,9 @@ public class AuthService {
         try {
             UsernamePasswordAuthenticationToken authenticationToken = loginReqDto.toAuthentication();
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-            String username = loginReqDto.username();
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-
-            if (user.getDeletedAt() != null) {
-                throw new DisabledException("탈퇴한 사용자입니다.");
-            }
             TokenDto tokens = tokenProvider.generateTokenDto(authentication);
             ValueOperations<String, String> ops = redisTemplate.opsForValue();
-            ops.set(loginReqDto.username(), tokens.refreshToken(), Duration.ofDays(2));
+            ops.set(authentication.getName(), tokens.refreshToken(), Duration.ofDays(2));
             return tokens;
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("유효하지 않은 아이디와 비밀번호입니다.", e);
@@ -68,9 +59,9 @@ public class AuthService {
             throw new RuntimeException("Token이 유효하지 않습니다.");
         }
         String username = tokenProvider.getUserIdFromRefreshToken(refreshToken);
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("회원을 찾을 수 없습니다."));
 
-        TokenDto tokens = tokenProvider.regenerateToken(user);
+        TokenDto tokens = tokenProvider.regenerateTokenFromRefresh(refreshToken);
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         ops.set(user.getUsername(), tokens.refreshToken(), Duration.ofDays(2));
         return tokens;
