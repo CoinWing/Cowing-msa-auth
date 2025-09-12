@@ -1,7 +1,6 @@
 package cowing.auth.jwt;
 
 import cowing.auth.dto.TokenDto;
-import cowing.auth.entity.User;
 import cowing.auth.service.PrincipalUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -73,31 +72,33 @@ public class TokenProvider {
                 .build();
     }
 
-    public TokenDto regenerateToken(User user) {
-        String authorities = user.getAuthority().toString();
+    // DB 조회 없이 리프레시 토큰만으로 재발급
+    public TokenDto regenerateTokenFromRefresh(String refreshToken) {
+        Claims claims = parseClaims(refreshToken);
+        String username = claims.getSubject();
+        String authorities = claims.get(AUTHORITIES_KEY, String.class);
 
         long now = (new Date()).getTime();
 
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder()
-                .subject(user.getUsername())
+                .subject(username)
                 .claim(AUTHORITIES_KEY, authorities)
                 .expiration(accessTokenExpiresIn)
                 .signWith(key)
                 .compact();
 
-        String refreshToken = Jwts.builder()
-                .subject(user.getUsername())
+        String newRefreshToken = Jwts.builder()
+                .subject(username)
                 .claim(AUTHORITIES_KEY, authorities)
                 .expiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key)
                 .compact();
 
-
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 

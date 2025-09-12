@@ -1,13 +1,15 @@
 package cowing.auth.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user", indexes = {@Index(name = "username_idx", columnList = "username", unique = true)})
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +21,7 @@ public class User {
     @Column(name = "u_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String username;
 
     @Column(nullable = false)

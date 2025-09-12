@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(name = "portfolio", indexes = {@Index(name = "portfolio_idx", columnList = "username, market_code", unique = true)})
 @AllArgsConstructor
 @NoArgsConstructor
 public class Portfolio {

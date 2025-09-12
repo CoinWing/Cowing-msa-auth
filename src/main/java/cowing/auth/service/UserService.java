@@ -10,10 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -31,7 +29,7 @@ public class UserService {
     @Transactional
     public boolean registerUser(String email, String rawPassword, String nickname, String username) {
         try {
-            validateUser(email, username);
+            validateUser(username);
             String hashedPassword = passwordEncoder.encode(rawPassword);
             User user = User.builder()
                     .email(email)
@@ -48,12 +46,9 @@ public class UserService {
         }
     }
 
-    private void validateUser(String email, String username) {
-        if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-        }
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+    private void validateUser(String username) {
+        if (userRepository.existsUserByUsername(username)) {
+            throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
         }
     }
 
